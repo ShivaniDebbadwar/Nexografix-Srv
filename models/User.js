@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema({
   manager: { type: String, required: true }, // New field
   forceChangePassword: { type: Boolean, default: true },
   lastLogin: { type: Date, default: null },
+  dateofJoining: { type: Date, default: null },
+  domain: { type: String, default: null },
   totalEarning: { type: String, default: 0 }
 
 }, { timestamps: true });
