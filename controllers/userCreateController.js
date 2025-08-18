@@ -7,7 +7,7 @@ const createUser = async (req, res) => {
   const { username, email, password, role, totalEarning, manager } = req.body;
 
   try {
-    const withOutBycriptPass = password;
+    const withOutBycriptPass = req.body.password;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
