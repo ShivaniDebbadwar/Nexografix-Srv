@@ -7,6 +7,7 @@ const createUser = async (req, res) => {
   const { username, email, password, role, totalEarning, manager } = req.body;
 
   try {
+    const withOutBycriptPass = password;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
@@ -21,11 +22,25 @@ const createUser = async (req, res) => {
     });
 
     await newUser.save();
-    const subject = "New User Created";
+    const subject = "Your Login Credentials for Nexografix HRIS";
         const message = `
-    Hello ${username},
+    Dear ${username},
     
-    Your User Created in Portal.
+    You have been successfully registered in the Nexografix HRIS system. This platform allows you to manage your attendance (login/logout time), payroll details, and other work records.
+    
+    Below are your login credentials:
+
+    User ID: ${username}
+
+    Temporary Password: ${withOutBycriptPass}
+
+    Important: You must change your password upon your first login. This will be a one-time requirement to secure your account.
+
+    Login here: [https://nexografix.netlify.app]
+
+   If you experience any technical issues, please reach out at [info@nexografix.com].
+
+
     
     Regards,
     InfoTech Team
