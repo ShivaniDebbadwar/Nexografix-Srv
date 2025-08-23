@@ -36,7 +36,8 @@ router.post("/:taskId/start", authMiddleware, async (req, res) => {
 
     if (task.status !== "inprogress")
       return res.status(400).json({ message: "Task is not in inprogress state" });
-
+    const employee = await User.findById(req.user.id).select("username email manager");
+    
     task.status = "started";
     task.startedDate = new Date();
     await task.save();
@@ -47,12 +48,12 @@ router.post("/:taskId/start", authMiddleware, async (req, res) => {
       await Notification.create({
         user: admin._id,
         recipientRole: admin.role, // required field
-        message: `Employee ${req.user.username} has started task: ${task.title}`,
+        message: `Employee ${employee?.username} has started task: ${task.title}`,
       });
       await sendEmail(
         admin.email,
         "Task Started",
-        `Employee ${req.user.username} has started the task "${task.title}".`
+        `Employee ${employee?.username} has started the task "${task.title}".`
       );
     }
 
@@ -75,20 +76,20 @@ router.post("/:taskId/complete", authMiddleware, async (req, res) => {
     task.status = "completed";
     task.submissionDate = new Date();
     await task.save();
-
+   const employee = await User.findById(req.user.id).select("username email manager");
     // Notify all admins
     const adminUsers = await User.find({ role: "admin" });
     for (const admin of adminUsers) {
       await Notification.create({
         user: admin._id,
         recipientRole: admin.role, // required field
-        message: `Employee ${req.user.username} has completed task: ${task.title}`,
+        message: `Employee ${employee?.username} has completed task: ${task.title}`,
       });
 
       await sendEmail(
         admin.email,
         "Task Completed",
-        `Employee ${req.user.username} has completed the task "${task.title}".`
+        `Employee ${employee?.username} has completed the task "${task.title}".`
       );
     }
 

@@ -9,6 +9,7 @@ const timesheetRoutes = require("./routes/timesheetRoutes");
 const desktopOnly = require("./middleware/desktopOnly");
 const weekendRoutes = require("./routes/weekendRoutes");
 const payrollRoutes = require("./routes/payrollRoutes");
+const shiftRoutes = require("./routes/shiftRoutes");
 require("./cron/payrollCron"); // just importing registers the cron
 const app = express();
 dotenv.config();
@@ -37,6 +38,7 @@ app.use("/api/weekend", weekendRoutes);
 app.use("/api/userGet", require("./routes/userGetRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/payroll", payrollRoutes);
+app.use("/api/shifts", shiftRoutes);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
