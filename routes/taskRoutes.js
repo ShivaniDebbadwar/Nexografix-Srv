@@ -9,7 +9,7 @@ router.post("/create", async (req, res) => {
   try {
     const {
       title,
-      description,
+      // description,
       employeeName,
       assignedTo,
       fileRows,   // ✅ get fileRows from body
@@ -21,7 +21,7 @@ router.post("/create", async (req, res) => {
 
     const task = new Task({
       title,
-      description,
+      // description,
       employeeName,
       assignedTo,
       fileRows,   // ✅ save fileRows array directly

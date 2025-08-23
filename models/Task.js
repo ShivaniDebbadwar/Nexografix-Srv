@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema({
   title: { type: String, required: true }, // Task name
-  description: { type: String },
   employeeName: { type: String, required: true },
   assignedTo: { type: String, required: true },
   // fileUrl: { type: String },
@@ -10,7 +9,8 @@ const taskSchema = new mongoose.Schema({
   fileRows: [
     {
       pdfUrl: { type: String },
-      excelUrl: { type: String }
+      excelUrl: { type: String },
+      description: { type: String }
     }
   ],
   assignedDate: { type: String },  // e.g., "2025-08-08"
