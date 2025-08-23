@@ -5,7 +5,14 @@ const taskSchema = new mongoose.Schema({
   description: { type: String },
   employeeName: { type: String, required: true },
   assignedTo: { type: String, required: true },
-  fileUrl: { type: String },
+  // fileUrl: { type: String },
+   // ✅ fileRows will store multiple objects { pdfUrl, excelUrl }
+  fileRows: [
+    {
+      pdfUrl: { type: String },
+      excelUrl: { type: String }
+    }
+  ],
   assignedDate: { type: String },  // e.g., "2025-08-08"
   assignedTime: { type: String },  // e.g., "14:30"
   submissionDate: { type: String }, // Filled during submission

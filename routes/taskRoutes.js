@@ -12,7 +12,7 @@ router.post("/create", async (req, res) => {
       description,
       employeeName,
       assignedTo,
-      fileUrl,
+      fileRows,   // ✅ get fileRows from body
       assignedDate,
       assignedTime,
       submissionDate,
@@ -24,7 +24,7 @@ router.post("/create", async (req, res) => {
       description,
       employeeName,
       assignedTo,
-      fileUrl,
+      fileRows,   // ✅ save fileRows array directly
       assignedDate,
       assignedTime,
       submissionDate,
@@ -46,9 +46,10 @@ router.post("/create", async (req, res) => {
     res.status(201).json({ message: "Task created and email sent", task });
   } catch (err) {
     console.error("Error creating task:", err);
-    res.status(500).json( "error:", err.message || "Server error" );
+    res.status(500).json({ error: err.message || "Server error" });
   }
 });
+
 
 // ✅ Route to submit a task
 router.put("/submit/:taskId", async (req, res) => {
