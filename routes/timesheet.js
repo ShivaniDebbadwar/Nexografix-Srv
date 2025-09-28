@@ -128,6 +128,23 @@ router.get('/week', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Error fetching weekly timesheets' });
   }
 });
+router.get("/manager/:managerName/approvals", async (req, res) => {
+  try {
+    console.log("Manager Name:", req); // Debug log
+   const managerName = req.user.name; 
+    const pendingTimesheets = await Timesheet.find({
+      manager: managerName,
+      status: "submitted"
+    });
 
+    res.json({
+      count: pendingTimesheets.length,
+      timesheets: pendingTimesheets
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching approvals" });
+  }
+});
 
 module.exports = router;
