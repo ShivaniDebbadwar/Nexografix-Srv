@@ -5,6 +5,6 @@ const { authMiddleware, isAdmin } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // GET all users - Admin only
-router.get("/", authMiddleware, isAdmin, getAllUsers);
+router.get("/", getAllUsers);
 
 module.exports = router;
