@@ -8,6 +8,7 @@ const TimesheetReopenSchema = new mongoose.Schema({
   },
   reason: String,
   date: String,
+  manager: { type: String, required: true },
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],

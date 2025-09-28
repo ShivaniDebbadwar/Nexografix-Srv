@@ -17,7 +17,8 @@ router.post("/reopen-request", async (req, res) => {
     const request = new TimesheetReopen({
       employeeId: employee._id,
       reason,
-      date
+      date,
+      manager: employee.manager, // assuming manager is stored in user profile
     });
 
     await request.save();
@@ -86,6 +87,9 @@ router.get("/reopen-requests/my", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
 
 // 👨‍💼 Admin: Approve or reject reopen request
 router.put("/reopen-review/:requestId", async (req, res) => {

@@ -4,6 +4,7 @@ const Timesheet = require('../models/Timesheet');
 const User = require('../models/User');
 const { authMiddleware }= require('../middleware/authMiddleware');
 const { isAdmin } = require('../middleware/isAdmin');
+const TimesheetReopen = require("../models/TimesheetReopen");
 
 // 📝 Create Draft Timesheet (Employee)
 router.post('/create', authMiddleware, async (req, res) => {
@@ -66,6 +67,7 @@ router.get('/my', authMiddleware, async (req, res) => {
 // 📋 Get All Timesheets (Admin)
 router.get('/all', authMiddleware, isAdmin, async (req, res) => {
   try {
+    console.log("Fetching all timesheets for admin:", req.user);
     const timesheets = await Timesheet.find().sort({ date: -1 });
     res.json(timesheets);
   } catch (error) {
@@ -128,14 +130,19 @@ router.get('/week', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Error fetching weekly timesheets' });
   }
 });
-router.get("/manager/:managerName/approvals", async (req, res) => {
+
+router.get('/manager/:managerName/approvals', async (req, res) => {
   try {
     console.log("Manager Name:", req); // Debug log
-   const managerName = req.user.name; 
+   const managerName = req.params.managerName;
+    if (!managerName) {
+      return res.status(400).json({ message: "Manager name is required" });
+    } 
     const pendingTimesheets = await Timesheet.find({
       manager: managerName,
       status: "submitted"
-    });
+    })
+    .populate("user", "username email");
 
     res.json({
       count: pendingTimesheets.length,
@@ -144,6 +151,121 @@ router.get("/manager/:managerName/approvals", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching approvals" });
+  }
+});
+
+router.get('/manager/:managerName/reopened', async (req, res) => {
+  try {
+    console.log("Manager Name:", req); // Debug log
+   const managerName = req.params.managerName;
+    if (!managerName) {
+      return res.status(400).json({ message: "Manager name is required" });
+    } 
+    const pendingTimesheets = await TimesheetReopen.find({
+      manager: managerName,
+      status: "pending"
+    })
+    .populate("employeeId", "username email");
+
+    res.json({
+      count: pendingTimesheets.length,
+      timesheets: pendingTimesheets
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching approvals" });
+  }
+});
+
+// Bulk Approve
+router.put("/bulk-approve", async (req, res) => {
+  const { ids } = req.body; // array of timesheet IDs
+  if (!ids || !ids.length) return res.status(400).json({ message: "No IDs provided" });
+
+  try {
+    await Timesheet.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status: "approved" } }
+    );
+    res.status(200).json({ message: "Timesheets approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to approve timesheets" });
+  }
+});
+
+// Bulk Reject
+router.put("/bulk-reject", async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !ids.length) return res.status(400).json({ message: "No IDs provided" });
+
+  try {
+    await Timesheet.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status: "rejected" } }
+    );
+    res.status(200).json({ message: "Timesheets rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to reject timesheets" });
+  }
+});
+
+// ✅ Approve Reopen Timesheet (Admin)
+router.put('/reopenApprove/:id', async (req, res) => {
+  try {
+    console.log("Reopen Approve ID:", req); // Debug log
+    const timesheet = await TimesheetReopen.findById(req.params.id);
+    console.log("Reopen Timesheet:", timesheet);
+
+    if (!timesheet) {
+      return res.status(404).json({ error: 'Reopen Timesheet not found' });
+    }
+
+    timesheet.status = 'approved';
+    await timesheet.save();
+
+//     const subject = "Your Reopen Timesheet Request Approved";
+//     const message = `
+// Hello ${timesheet.employeeId.username},
+
+// Your Reopen Timesheet request has been approved.
+
+// Regards,
+// Info Team
+//     `;
+//     await sendEmail(timesheet.employeeId.email, subject, message);
+
+    res.json({ message: "Reopen Timesheet request approved and employee notified." });
+  } catch (error) {
+    res.status(500).json({ error: 'Error Reopen approving timesheet' });
+  }
+});
+
+// ❌ Reject Reopen Timesheet (Admin)
+router.put('/reopenReject/:id', async (req, res) => {
+  try {
+    const timesheet = await TimesheetReopen.findById(req.params.id).populate("employeeId");
+
+    if (!timesheet) {
+      return res.status(404).json({ error: 'Reopen Timesheet not found' });
+    }
+
+    timesheet.status = 'rejected';
+    await timesheet.save(); const subject = "Your Reopen Timesheet Request Rejected";
+//     const message = `
+// Hello ${timesheet.employeeId.username},
+
+// Your Reopen Timesheet request has been Rejected.
+
+// Regards,
+// Info Team
+//     `;
+//     await sendEmail(timesheet.employeeId.email, subject, message);
+
+    res.json({ message: "Reopen Timesheet request Rejected and employee notified." });
+  } catch (error) {
+    res.status(500).json({ error: 'Error Reopen rejecting timesheet' });
   }
 });
 

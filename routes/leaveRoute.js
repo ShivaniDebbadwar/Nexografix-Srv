@@ -144,5 +144,61 @@ router.get("/history", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.get('/manager/:managerName/approvals', async (req, res) => {
+  try {
+    console.log("Manager Name:", req); // Debug log
+   const managerName = req.params.managerName;
+    if (!managerName) {
+      return res.status(400).json({ message: "Manager name is required" });
+    } 
+    const pendingLeave = await Leave.find({
+      manager: managerName,
+      status: "pending"
+    })
+    .populate("employeeId", "username email");
+
+    res.json({
+      count: pendingLeave.length,
+      timesheets: pendingLeave
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching approvals" });
+  }
+});
+
+// Bulk Approve
+router.put("/bulk-approve", async (req, res) => {
+  const { ids } = req.body; // array of timesheet IDs
+  if (!ids || !ids.length) return res.status(400).json({ message: "No IDs provided" });
+
+  try {
+    await Leave.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status: "approved" } }
+    );
+    res.status(200).json({ message: "Timesheets approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to approve timesheets" });
+  }
+});
+
+// Bulk Reject
+router.put("/bulk-reject", async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !ids.length) return res.status(400).json({ message: "No IDs provided" });
+
+  try {
+    await Leave.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status: "rejected" } }
+    );
+    res.status(200).json({ message: "Timesheets rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to reject timesheets" });
+  }
+});
 
 module.exports = router;
