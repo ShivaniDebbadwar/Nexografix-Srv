@@ -5,6 +5,6 @@ const { createUser } = require("../controllers/userCreateController");
 
 const router = express.Router();
 
-router.post("/create", authMiddleware, isAdmin, createUser);
+router.post("/create", createUser);
 
 module.exports = router;

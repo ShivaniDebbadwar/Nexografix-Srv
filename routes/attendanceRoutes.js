@@ -163,9 +163,9 @@ router.get("/history", authMiddleware, async (req, res) => {
 // ----------------------
 router.get("/all", authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden" });
-    }
+    // if (req.user.role !== "admin") {
+    //   return res.status(403).json({ message: "Forbidden" });
+    // }
     const records = await Attendance.find()
       .populate("userId", "username email role")
       .sort({ date: -1 });
